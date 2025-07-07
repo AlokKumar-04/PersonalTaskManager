@@ -1,0 +1,19 @@
+from django.urls import path
+from django.contrib.auth.views import LogoutView
+from . import views
+
+app_name = "doorway"
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('login/', views.login_view, name='login'),
+    path('signup/', views.signup, name='signup'),
+    path('logout/', views.custom_logout, name='logout'),
+    path('dashboard/', views.task_dashboard, name='dashboard'),
+    path('create/', views.create_task, name='create_task'),
+    path('update/<int:task_id>/', views.update_task, name='update_task'),
+    path('delete/<int:task_id>/', views.delete_task, name='delete_task'),
+    path('toggle/<int:task_id>/', views.toggle_task_completion, name='toggle_task_completion'),
+    path('detail/<int:task_id>/', views.task_detail, name='task_detail'),
+      
+]

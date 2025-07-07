@@ -1,0 +1,91 @@
+{% extends 'doorway/base.html' %}
+{% block title %}Create Task - Task Manager{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">➕ Create New Task</h1>
+    <a href="{% url 'doorway:dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+<div class="task-card form-card">
+    <div class="task-header">
+        <h4 class="task-title">📝 Task Details</h4>
+    </div>
+    
+    <form method="post" class="task-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="title">Task Title</label>
+            <input type="text" class="form-control" id="title" name="title" 
+                   value="{{ form.title.value|default:'' }}" required placeholder="Enter task title...">
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" 
+                      rows="4" placeholder="Enter task description...">{{ form.description.value|default:'' }}</textarea>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select class="form-control" id="priority" name="priority" required>
+                    <option value="">Select priority...</option>
+                    {% for value, label in priority_choices %}
+                        <option value="{{ value }}" {% if form.priority.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="due_date">Due Date</label>
+                <input type="date" class="form-control" id="due_date" name="due_date" 
+                       value="{{ form.due_date.value|default:'' }}" required>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="is_completed" {% if form.is_completed.value %}checked{% endif %}>
+                <span class="checkmark"></span>
+                Mark as completed
+            </label>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Create Task</button>
+            <a href="{% url 'doorway:dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Tips -->
+<div class="task-card tips-card">
+    <div class="task-header">
+        <h4 class="task-title">💡 Quick Tips</h4>
+    </div>
+    
+    <div class="tips-content">
+        <div class="tip-item">
+            <div class="tip-icon">📝</div>
+            <div class="tip-text">
+                <strong>Clear Titles:</strong> Use descriptive titles that clearly explain what needs to be done.
+            </div>
+        </div>
+        
+        <div class="tip-item">
+            <div class="tip-icon">⚡</div>
+            <div class="tip-text">
+                <strong>Set Priority:</strong> Choose the right priority level to help organize your workflow.
+            </div>
+        </div>
+        
+        <div class="tip-item">
+            <div class="tip-icon">📅</div>
+            <div class="tip-text">
+                <strong>Due Dates:</strong> Set realistic due dates to keep yourself on track.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

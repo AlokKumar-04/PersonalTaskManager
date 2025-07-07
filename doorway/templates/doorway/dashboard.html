@@ -1,0 +1,154 @@
+{% extends 'doorway/base.html' %}
+{% block title %}Dashboard - Task Manager{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📋 Task Dashboard</h1>
+    <a href="{% url "doorway:create_task" %}" class="btn btn-primary">+ New Task</a>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon stat-total">📊</div>
+        <div class="stat-info">
+            <h3>{{ total_tasks }}</h3>
+            <p>Total Tasks</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon stat-pending">⏳</div>
+        <div class="stat-info">
+            <h3>{{ pending_tasks }}</h3>
+            <p>Pending</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon stat-completed">✅</div>
+        <div class="stat-info">
+            <h3>{{ completed_tasks }}</h3>
+            <p>Completed</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon stat-overdue">⚠️</div>
+        <div class="stat-info">
+            <h3>{{ overdue_tasks }}</h3>
+            <p>Overdue</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="filter-section">
+    <h3 style="margin-bottom: 1rem;">🔍 Filters & Search</h3>
+    <form method="get" class="filter-grid">
+        <div class="form-group">
+            <label for="search">Search Tasks</label>
+            <input type="text" class="form-control" id="search" name="search" 
+                   value="{{ search_query }}" placeholder="Search tasks...">
+        </div>
+        
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select class="form-control" id="status" name="status">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="overdue" {% if status_filter == 'overdue' %}selected{% endif %}>Overdue</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="priority">Priority</label>
+            <select class="form-control" id="priority" name="priority">
+                <option value="all" {% if priority_filter == 'all' %}selected{% endif %}>All</option>
+                {% for value, label in priority_choices %}
+                    <option value="{{ value }}" {% if priority_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="sort">Sort By</label>
+            <select class="form-control" id="sort" name="sort">
+                <option value="due_date" {% if sort_by == 'due_date' %}selected{% endif %}>Due Date</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
+                <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Priority</option>
+                <option value="created" {% if sort_by == 'created' %}selected{% endif %}>Created Date</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="#" class="btn btn-secondary">Clear</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Tasks List -->
+<div>
+    <h3 style="margin-bottom: 1rem;">📝 Tasks ({{ tasks.count }})</h3>
+    
+    {% if tasks %}
+        <div class="tasks-grid">
+            {% for task in tasks %}
+                <div class="task-card 
+                    {% if task.is_completed %}completed{% endif %}
+                    {% if not task.is_completed and task.due_date < today %}overdue{% endif %}
+                    priority-{{ task.priority|lower }}">
+                    
+                    <div class="task-header">
+                        <h4 class="task-title">{{ task.title }}</h4>
+                        <div class="dropdown task-menu">
+                            <button class="task-menu-btn">⋮</button>
+                            <div class="dropdown-content">
+                                <a href="{% url 'doorway:task_detail' task.id %}">👁️ View Details</a>
+                                <a href="{% url 'doorway:update_task' task.id %}">✏️ Edit</a>
+                                <a href="{% url 'doorway:toggle_task_completion' task.id %}">
+                                    {% if task.is_completed %}↩️ Mark Incomplete{% else %}✅ Mark Complete{% endif %}
+                                </a>
+                                <a href="{% url 'doorway:delete_task' task.id %}" style="color: #dc3545;">🗑️ Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if task.description %}
+                        <p class="task-description">{{ task.description|truncatewords:20 }}</p>
+                    {% endif %}
+                    
+                    <div class="task-meta">
+                        <div class="task-badges">
+                            <span class="badge badge-{{ task.priority|lower }}">{{ task.priority }}</span>
+                            {% if task.is_completed %}
+                                <span class="badge badge-completed">✅ Completed</span>
+                            {% elif not task.is_completed and task.due_date < today %}
+                                <span class="badge badge-overdue">⚠️ Overdue</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="task-date">
+                        📅 Due: {{ task.due_date|date:"M d, Y" }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>📭 No tasks found</h3>
+            <p>{% if search_query or status_filter != 'all' or priority_filter != 'all' %}
+                Try adjusting your filters or search terms.
+            {% else %}
+                Create your first task to get started!
+            {% endif %}</p>
+            <a href="{% url "doorway:create_task" %}" class="btn btn-primary">+ Create Task</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,48 @@
+{% extends 'doorway/base.html' %} {% block title %}Home - My{% endblock %}
+{%block content %}
+<div style="text-align: center; padding: 50px 0">
+  <h1>Welcome to Your Personal Task Manager</h1>
+
+  {% if messages %} {% for message in messages %}
+  <div
+    style="
+      background-color: #d1ecf1;
+      color: #0c5460;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px auto;
+      max-width: 600px;
+      border: 1px solid #bee5eb;
+    "
+  >
+    {{ message }}
+  </div>
+  {% endfor %} {% endif %} {% if user.is_authenticated %}
+  <p>Hello, <strong>{{ user.username }}</strong>! You are logged in.</p>
+  <p>This is protected content that only logged-in users can see.</p>
+  <div style="margin-top: 30px">
+    <a
+      href="{% url 'doorway:dashboard' %}"
+      style="
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 4px;
+        margin: 0 10px;
+      "
+      >Dashboard</a
+    >
+    
+  </div>
+  {% else %}
+  <p>
+    Please <a href="{% url 'login' %}" style="color: #007bff">login</a> or
+    <a href="{% url 'doorway:signup' %}" style="color: #28a745"
+      >create an account</a
+    >
+    to access more features.
+  </p>
+  {% endif %}
+</div>
+{% endblock %}

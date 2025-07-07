@@ -1,0 +1,93 @@
+{% extends 'doorway/base.html' %}
+{% block title %}Delete Task - Task Manager{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🗑️ Delete Task</h1>
+    <a href="{% url 'doorway:dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+<div class="task-card warning-card">
+    <div class="task-header">
+        <h4 class="task-title">⚠️ Delete Confirmation</h4>
+    </div>
+    
+    <div class="warning-content">
+        <h3>Are you sure you want to delete this task?</h3>
+        <p>This action cannot be undone. The task will be permanently removed from your dashboard.</p>
+    </div>
+</div>
+    <!-- Task Preview -->
+    <div class="task-card preview-card">
+        <div class="task-header">
+            <h4 class="task-title">📋 Task to be deleted</h4>
+        </div>
+        
+        <div class="task-card 
+            {% if task.is_completed %}completed{% endif %}
+            {% if not task.is_completed and task.due_date < today %}overdue{% endif %}
+            priority-{{ task.priority|lower }}" style="margin-top: 1rem;">
+            
+            <div class="task-header">
+                <h4 class="task-title">{{ task.title }}</h4>
+            </div>
+            
+            {% if task.description %}
+                <p class="task-description">{{ task.description }}</p>
+            {% endif %}
+            
+            <div class="task-meta">
+                <div class="task-badges">
+                    <span class="badge badge-{{ task.priority|lower }}">{{ task.priority }}</span>
+                    {% if task.is_completed %}
+                        <span class="badge badge-completed">✅ Completed</span>
+                    {% elif not task.is_completed and task.due_date < today %}
+                        <span class="badge badge-overdue">⚠️ Overdue</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="task-date">
+                📅 Due: {{ task.due_date|date:"M d, Y" }}
+            </div>
+            
+            <div class="task-created">
+                🕐 Created: {{ task.created_at|date:"M d, Y" }}
+            </div>
+        </div>
+    </div>
+    <!-- Confirmation Form -->
+    <div class="task-card action-card">
+        <div class="task-header">
+            <h4 class="task-title">🎯 Choose Action</h4>
+        </div>
+        
+        <form method="post" class="delete-form">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">🗑️ Yes, Delete Task</button>
+                <a href="{% url 'doorway:task_detail' task.id %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'doorway:dashboard' %}" class="btn btn-primary">← Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Alternative Actions -->
+<div class="task-card alternative-card">
+    <div class="task-header">
+        <h4 class="task-title">🤔 Changed your mind?</h4>
+    </div>
+    
+    <div class="alternative-content">
+        <p>Instead of deleting, you could:</p>
+        <div class="action-buttons">
+            <a href="{% url 'doorway:update_task' task.id %}" class="btn btn-outline">✏️ Edit Task</a>
+            {% if not task.is_completed %}
+                <a href="{% url 'doorway:toggle_task_completion' task.id %}" class="btn btn-outline">✅ Mark Complete</a>
+            {% else %}
+                <a href="{% url 'doorway:toggle_task_completion' task.id %}" class="btn btn-outline">↩️ Mark Incomplete</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
