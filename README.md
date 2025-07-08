@@ -10,7 +10,7 @@ A personal task management system built with Django. Users can sign up, log in, 
 
 | Home Page | Dashboard | Task Detail |
 |-----------|-----------|-------------|
-| ![Home](screenshots/home.png) | ![Dashboard](screenshots/dashboard.png) | ![Task Detail](screenshots/task_detail.png) |
+| ![Home](screenshots/home.png) | ![Dashboard](screenshots/dashboard.png) | ![Task Detail](screenshots/task_details.png) |
 
 ---
 

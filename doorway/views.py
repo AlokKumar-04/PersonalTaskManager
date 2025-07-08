@@ -1,17 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.utils import timezone
-from datetime import date
+from datetime import date, datetime
+from django.urls import reverse
+from django.http import HttpResponse
+import csv
+import io
+
 from .models import Task
 from .forms import TaskForm
-from django.urls import reverse
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+
 
 
 # Create your views here.
@@ -206,3 +216,254 @@ def task_detail(request, task_id):
     
     return render(request, 'doorway/task_detail.html', context)
 
+
+
+# CSV Export Views
+@login_required
+def export_tasks_csv(request):
+    """Export user's tasks to CSV format"""
+    # Get user's tasks
+    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="tasks_{request.user.username}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+    
+    # Create CSV writer
+    writer = csv.writer(response)
+    
+    # Write header row
+    writer.writerow([
+        'Title',
+        'Description',
+        'Priority',
+        'Due Date',
+        'Status',
+        'Created Date',
+        'Completed'
+    ])
+    
+    # Write task data
+    for task in tasks:
+        writer.writerow([
+            task.title,
+            task.description or '',
+            task.priority,
+            task.due_date.strftime('%Y-%m-%d'),
+            'Completed' if task.is_completed else 'Pending',
+            task.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'Yes' if task.is_completed else 'No'
+        ])
+    
+    return response
+
+@login_required
+def export_single_task_csv(request, task_id):
+    """Export a single task to CSV format"""
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="task_{task.id}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+    
+    # Create CSV writer
+    writer = csv.writer(response)
+    
+    # Write header row
+    writer.writerow([
+        'Title',
+        'Description',
+        'Priority',
+        'Due Date',
+        'Status',
+        'Created Date',
+        'Completed'
+    ])
+    
+    # Write task data
+    writer.writerow([
+        task.title,
+        task.description or '',
+        task.priority,
+        task.due_date.strftime('%Y-%m-%d'),
+        'Completed' if task.is_completed else 'Pending',
+        task.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'Yes' if task.is_completed else 'No'
+    ])
+    
+    return response
+
+# PDF Export Views
+@login_required
+def export_tasks_pdf(request):
+    """Export user's tasks to PDF format"""
+    # Get user's tasks
+    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Create PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="tasks_{request.user.username}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    
+    # Create PDF document
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    story = []
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    title_style = styles['Title']
+    heading_style = styles['Heading2']
+    normal_style = styles['Normal']
+    
+    # Add title
+    title = Paragraph(f"Task Report - {request.user.username}", title_style)
+    story.append(title)
+    story.append(Spacer(1, 12))
+    
+    # Add generation date
+    date_para = Paragraph(f"Generated on: {timezone.now().strftime('%B %d, %Y at %I:%M %p')}", normal_style)
+    story.append(date_para)
+    story.append(Spacer(1, 12))
+    
+    # Add summary
+    total_tasks = tasks.count()
+    completed_tasks = tasks.filter(is_completed=True).count()
+    pending_tasks = total_tasks - completed_tasks
+    overdue_tasks = tasks.filter(due_date__lt=timezone.now().date(), is_completed=False).count()
+    
+    summary_data = [
+        ['Summary', ''],
+        ['Total Tasks', str(total_tasks)],
+        ['Completed', str(completed_tasks)],
+        ['Pending', str(pending_tasks)],
+        ['Overdue', str(overdue_tasks)]
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[2*inch, 1*inch])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    story.append(summary_table)
+    story.append(Spacer(1, 20))
+    
+    # Add tasks table
+    if tasks.exists():
+        heading = Paragraph("Task Details", heading_style)
+        story.append(heading)
+        story.append(Spacer(1, 12))
+        
+        # Prepare table data
+        table_data = [['Title', 'Priority', 'Due Date', 'Status', 'Created']]
+        
+        for task in tasks:
+            table_data.append([
+                task.title[:30] + '...' if len(task.title) > 30 else task.title,
+                task.priority,
+                task.due_date.strftime('%Y-%m-%d'),
+                'Completed' if task.is_completed else 'Pending',
+                task.created_at.strftime('%Y-%m-%d')
+            ])
+        
+        # Create table
+        task_table = Table(table_data, colWidths=[2.5*inch, 0.8*inch, 1*inch, 1*inch, 1*inch])
+        task_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP')
+        ]))
+        
+        story.append(task_table)
+    else:
+        no_tasks = Paragraph("No tasks found.", normal_style)
+        story.append(no_tasks)
+    
+    # Build PDF
+    doc.build(story)
+    return response
+
+@login_required
+def export_single_task_pdf(request, task_id):
+    """Export a single task to PDF format"""
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    
+    # Create PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="task_{task.id}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    
+    # Create PDF document
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    story = []
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    title_style = styles['Title']
+    heading_style = styles['Heading2']
+    normal_style = styles['Normal']
+    
+    # Custom style for task details
+    detail_style = ParagraphStyle(
+        'DetailStyle',
+        parent=normal_style,
+        fontSize=10,
+        spaceAfter=6,
+        leftIndent=20
+    )
+    
+    # Add title
+    title = Paragraph(f"Task Details: {task.title}", title_style)
+    story.append(title)
+    story.append(Spacer(1, 12))
+    
+    # Add generation date
+    date_para = Paragraph(f"Generated on: {timezone.now().strftime('%B %d, %Y at %I:%M %p')}", normal_style)
+    story.append(date_para)
+    story.append(Spacer(1, 20))
+    
+    # Task details
+    details = [
+        ('Title:', task.title),
+        ('Description:', task.description or 'No description provided'),
+        ('Priority:', task.priority),
+        ('Due Date:', task.due_date.strftime('%B %d, %Y')),
+        ('Status:', 'Completed' if task.is_completed else 'Pending'),
+        ('Created:', task.created_at.strftime('%B %d, %Y at %I:%M %p')),
+        ('Owner:', task.user.username)
+    ]
+    
+    for label, value in details:
+        heading = Paragraph(label, heading_style)
+        story.append(heading)
+        detail = Paragraph(str(value), detail_style)
+        story.append(detail)
+        story.append(Spacer(1, 8))
+    
+    # Build PDF
+    doc.build(story)
+    return response
+
+# Export options view
+@login_required
+def export_options(request):
+    """Display export options page"""
+    tasks = Task.objects.filter(user=request.user)
+    context = {
+        'total_tasks': tasks.count(),
+        'completed_tasks': tasks.filter(is_completed=True).count(),
+        'pending_tasks': tasks.filter(is_completed=False).count(),
+        'overdue_tasks': tasks.filter(due_date__lt=timezone.now().date(), is_completed=False).count()
+    }
+    return render(request, 'tasks/export_options.html', context)
