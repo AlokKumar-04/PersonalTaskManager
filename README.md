@@ -48,7 +48,7 @@ A personal task management system built with Django. Users can sign up, log in, 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/django-task-manager.git
+git clone https://github.com/AlokKumar-04/django-task-manager.git
 cd django-task-manager
 ```
 
