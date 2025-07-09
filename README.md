@@ -6,8 +6,6 @@ A personal task management system built with Django. Users can sign up, log in, 
 
 ## 📸 Preview
 
-> Add screenshots in the `screenshots/` folder and update paths below.
-
 | Home Page | Dashboard | Task Detail |
 |-----------|-----------|-------------|
 | ![Home](screenshots/home.png) | ![Dashboard](screenshots/dashboard.png) | ![Task Detail](screenshots/task_details.png) |
