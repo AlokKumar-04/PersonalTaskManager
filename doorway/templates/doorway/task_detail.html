@@ -25,6 +25,77 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .task-title-main {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+    
+    .task-export-options {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .export-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .export-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .export-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .export-dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: white;
+        min-width: 160px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        z-index: 1000;
+        border: 1px solid #ddd;
+        overflow: hidden;
+    }
+    
+    .export-dropdown-content.show {
+        display: block;
+    }
+    
+    .export-dropdown-content a {
+        color: #333;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+    
+    .export-dropdown-content a:hover {
+        background-color: #f1f1f1;
     }
     
     .task-status-badge {
@@ -298,7 +369,17 @@
             font-size: 1.5rem;
             flex-direction: column;
             align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .task-title-main {
+            flex-direction: column;
+            align-items: flex-start;
             gap: 0.5rem;
+        }
+        
+        .task-export-options {
+            align-self: flex-end;
         }
         
         .task-detail-meta {
@@ -336,10 +417,25 @@
     <!-- Task Header -->
     <div class="task-detail-header">
         <div class="task-detail-title">
-            {{ task.title }}
-            <span class="task-status-badge {% if task.is_completed %}status-completed{% else %}status-pending{% endif %}">
-                {% if task.is_completed %}✓ Completed{% else %}○ Pending{% endif %}
-            </span>
+            <div class="task-title-main">
+                {{ task.title }}
+                <span class="task-status-badge {% if task.is_completed %}status-completed{% else %}status-pending{% endif %}">
+                    {% if task.is_completed %}✓ Completed{% else %}○ Pending{% endif %}
+                </span>
+            </div>
+            
+            <!-- Export Options -->
+            <div class="task-export-options">
+                <div class="export-dropdown">
+                    <button class="export-btn" onclick="toggleExportDropdown()">
+                        📊 Export <span style="font-size: 0.7rem;">▼</span>
+                    </button>
+                    <div class="export-dropdown-content" id="exportDropdown">
+                        <a href="{% url 'doorway:export_single_task_csv' task.id %}">📄 Export as CSV</a>
+                        <a href="{% url 'doorway:export_single_task_pdf' task.id %}">📋 Export as PDF</a>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="task-detail-meta">
@@ -460,7 +556,24 @@
 
 {% block extra_js %}
 <script>
-    // Add any JavaScript for the task detail page here
+    // Toggle export dropdown
+    function toggleExportDropdown() {
+        document.getElementById("exportDropdown").classList.toggle("show");
+    }
+    
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.export-btn')) {
+            var dropdowns = document.getElementsByClassName("export-dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
         // Auto-focus on edit button for better UX
         const editButton = document.querySelector('.btn-edit');

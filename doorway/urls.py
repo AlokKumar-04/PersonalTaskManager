@@ -15,7 +15,10 @@ urlpatterns = [
     path('delete/<int:task_id>/', views.delete_task, name='delete_task'),
     path('toggle/<int:task_id>/', views.toggle_task_completion, name='toggle_task_completion'),
     path('detail/<int:task_id>/', views.task_detail, name='task_detail'),
-    path('export_tasks_csv', views.export_tasks_csv, name='export_tasks_csv'),
-    path('export_tasks_pdf', views.export_tasks_pdf, name='export_tasks_pdf'),
+    path('export_tasks_csv/', views.export_tasks_csv, name='export_tasks_csv'),
+    path('export_tasks_pdf/', views.export_tasks_pdf, name='export_tasks_pdf'),
+    path('export_single_task_csv/<int:task_id>/', views.export_single_task_csv, name='export_single_task_csv'),
+    path('export_single_task_pdf/<int:task_id>/', views.export_single_task_pdf, name='export_single_task_pdf'),
+    path('export_options/', views.export_options, name='export_options'),
       
 ]

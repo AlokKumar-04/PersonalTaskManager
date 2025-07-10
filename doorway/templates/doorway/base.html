@@ -599,11 +599,13 @@
                 
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'doorway:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+                    <li><a href="{% url 'doorway:export_options' %}" class="{% if request.resolver_match.url_name == 'export_options' %}active{% endif %}">Export Task</a></li>
                     <li class="user-menu">
                         <a href="#" class="user-link">{{ user.username }} ▼</a>
                         <div class="user-dropdown">
                             <a href="{% url 'doorway:home' %}">Home</a>
                             <a href="{% url 'doorway:dashboard' %}">Dashboard</a>
+                            <a href="{% url 'doorway:export_options' %}">Export Task</a>
                             <a href="#" onclick="return false;">Settings</a>
                             <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid #eee;">
                             <a href="{% url 'doorway:logout' %}">Logout</a>

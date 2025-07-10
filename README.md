@@ -1,10 +1,12 @@
-# 🗂️ Django Task Manager
+# 🗂️ Personal Task Manager
 
-A personal task management system built with Django. Users can sign up, log in, and manage their daily tasks through an intuitive dashboard. Features include task creation, updating, filtering by priority or status, task statistics, and completion tracking.
+A Django-based web application to manage your personal tasks efficiently. With features like user authentication, task filtering, priority management, and export options, it's built to help you stay organized and productive.
 
 ---
 
 ## 📸 Preview
+
+> Add screenshots in the `screenshots/` folder and update paths below.
 
 | Home Page | Dashboard | Task Detail |
 |-----------|-----------|-------------|
@@ -12,123 +14,93 @@ A personal task management system built with Django. Users can sign up, log in, 
 
 ---
 
-## ✨ Features
+## 📤 Export Tasks (CSV & PDF)
 
-- 🔐 **User Authentication**
-  - Sign Up, Login, Logout
-- 📝 **Task Management**
-  - Create, Update, Delete Tasks
-  - Toggle task completion
-- 🔍 **Search and Filters**
-  - Search by title or description
-  - Filter by status: Completed, Pending, Overdue
-  - Filter by priority: High, Medium, Low
-- 📊 **Task Statistics**
-  - Total, Completed, Pending, Overdue
-- 📆 **Sorting Options**
-  - Sort by Due Date, Priority, Title, Created Date
-- 📄 **Detail View**
-  - Task details page with overdue indicator
+Easily export your tasks for reporting or backup purposes in **CSV** or **PDF** formats.
+
+### ✅ Export Options:
+
+- **📁 All Tasks to CSV**  
+  Get a `.csv` file with all your task details (title, description, priority, due date, status, etc.).
+
+- **📝 Single Task to CSV**  
+  Export individual task info in CSV format.
+
+- **📄 All Tasks to PDF**  
+  Generate a PDF report including:
+  - Task summary (total, completed, pending, overdue)
+  - Detailed task table with creation and due dates
+
+- **📌 Single Task to PDF**  
+  Professionally formatted task document with complete metadata.
+
+- **🧭 Export Options Page**  
+  A dedicated view to access all export types and stats.
+
+### 📍 Export Routes:
+
+| URL | Description |
+|-----|-------------|
+| `/export_tasks_csv/` | Export all tasks as a CSV file |
+| `/export_tasks_pdf/` | Export all tasks as a PDF file |
+| `/export_single_task_csv/<int:task_id>/` | Export one task as CSV |
+| `/export_single_task_pdf/<int:task_id>/` | Export one task as PDF |
+| `/export_options/` | View export options and summary |
+
+> 📦 Files are named with your username and a timestamp for easy tracking.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Django 5.x
-- **Frontend:** HTML, CSS
-- **Database:** SQLite (default)
-- **Authentication:** Django’s built-in system
+- **Backend**: Django, Python
+- **Frontend**: HTML, CSS, Bootstrap
+- **Database**: SQLite (default), can be replaced with PostgreSQL/MySQL
+- **Exports**:  
+  - CSV: Python `csv` module  
+  - PDF: `reportlab` library
 
 ---
 
-## 🚀 Getting Started
-
-### 1. Clone the repository
+## 💻 Installation
 
 ```bash
-git clone https://github.com/AlokKumar-04/django-task-manager.git
-cd django-task-manager
-```
-
-### 2. Create and activate a virtual environment
-
-```bash
+git clone https://github.com/yourusername/personal-task-manager.git
+cd personal-task-manager
 python -m venv venv
-# Activate on Windows
-venv\Scripts\activate
-# Activate on macOS/Linux
-source venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
+source venv/bin/activate   # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-### 4. Apply migrations
-
-```bash
 python manage.py migrate
+python manage.py runserver
 ```
 
-### 5. Create a superuser (optional for admin access)
+---
 
+## 🔐 Admin Access
+
+To create a superuser:
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6. Run the development server
-
-```bash
-python manage.py runserver
-```
-
-### 7. Access the app
-
-Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+Then log in at `/admin/`.
 
 ---
 
-## 📁 Project Structure
+## 📸 Screenshots
 
-```
-doorway/
-├── templates/
-│   ├── doorway/
-│   │   ├── home.html
-│   │   ├── dashboard.html
-│   │   ├── create_task.html
-│   │   ├── update_task.html
-│   │   ├── delete_task.html
-│   │   └── task_detail.html
-│   └── registration/
-│       ├── login.html
-│       └── registration.html
-├── models.py
-├── forms.py
-├── views.py
-├── urls.py
-```
+> *(Add your app screenshots here — e.g., dashboard view, export options page, task PDF sample)*
 
 ---
 
-## ✅ Example User
+## 👤 Author
 
-| Username | Password     |
-|----------|--------------|
-| demo_user | test@1234  |
-
-You can also register as a new user.
+**Alok Kumar Panda**  
+🔗 [Portfolio](https://portfolio-one-mu-78.vercel.app/)  
+🔗 [LinkedIn](https://www.linkedin.com/in/alok-kumar-panda-864b421a4)
 
 ---
 
-## 📬 Feedback & Contributions
+## 📃 License
 
-Contributions are welcome! Feel free to open an issue or submit a pull request. ⭐
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.

@@ -30,8 +30,7 @@ ALLOWED_HOSTS = []
 
 
 LOGIN_URL = '/accounts/login/'
-
-
+LOGIN_REDIRECT_URL = '/doorway/'
 
 # Application definition
 

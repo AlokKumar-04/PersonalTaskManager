@@ -70,7 +70,7 @@ def login_view(request):
 def custom_logout(request):
     logout(request)
     messages.success(request, "You have been logged out.")
-    return redirect('login')  
+    return redirect('home')  
 
 
 @login_required
@@ -141,6 +141,8 @@ def task_dashboard(request):
     return render(request, 'doorway/dashboard.html', context)
 
 
+from .models import Task
+
 @login_required
 def create_task(request):
     if request.method == 'POST':
@@ -154,7 +156,11 @@ def create_task(request):
     else:
         form = TaskForm()
     
-    return render(request, 'doorway/create_task.html', {'form': form})
+    return render(request, 'doorway/create_task.html', {
+        'form': form,
+        'priority_choices': Task.PRIORITY_CHOICES,  
+    })
+
 
 
 @login_required
@@ -466,4 +472,4 @@ def export_options(request):
         'pending_tasks': tasks.filter(is_completed=False).count(),
         'overdue_tasks': tasks.filter(due_date__lt=timezone.now().date(), is_completed=False).count()
     }
-    return render(request, 'tasks/export_options.html', context)
+    return render(request, 'doorway/export_options.html', context)
