@@ -65,8 +65,8 @@ Easily export your tasks for reporting or backup purposes in **CSV** or **PDF** 
 ## 💻 Installation
 
 ```bash
-git clone https://github.com/yourusername/personal-task-manager.git
-cd personal-task-manager
+git clone https://github.com/AlokKumar-04/PersonalTaskManager.git
+cd PersonalTaskManager
 python -m venv venv
 source venv/bin/activate   # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -85,13 +85,6 @@ python manage.py createsuperuser
 
 Then log in at `/admin/`.
 
----
-
-## 📸 Screenshots
-
-> *(Add your app screenshots here — e.g., dashboard view, export options page, task PDF sample)*
-
----
 
 ## 👤 Author
 
